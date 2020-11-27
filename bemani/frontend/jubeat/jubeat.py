@@ -47,7 +47,6 @@ class JubeatFrontend(FrontendBase):
         for version in versions:
             emblem = self.__format_jubeat_extras(version)
             result[version] = emblem['emblems']
-        print(result)
         return result
 
     def __format_jubeat_extras(self, version) -> Dict[str, List[Dict[str, Any]]]:

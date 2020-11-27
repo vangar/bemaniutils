@@ -1,5 +1,5 @@
 # vim: set fileencoding=utf-8
-from typing import Any, Dict, Iterator, Tuple
+from typing import Any, Dict, Iterator, Tuple, List
 
 from bemani.backend.jubeat import JubeatFactory, JubeatBase
 from bemani.common import ValidatedDict, GameConstants, VersionConstants
@@ -41,6 +41,42 @@ class JubeatFrontend(FrontendBase):
         for (game, version, name) in self.all_games():
             if version in mapping:
                 yield (game, mapping[version], name)
+
+    def get_all_items(self, versions) -> Dict[str, List[Dict[str, Any]]]:
+        result = {}
+        for version in versions:
+            emblem = self.__format_jubeat_extras(version)
+            result[version] = emblem['emblems']
+        print(result)
+        return result
+
+    def __format_jubeat_extras(self, version) -> Dict[str, List[Dict[str, Any]]]:
+        # Gotta look up the unlock catalog
+        items = self.data.local.game.get_items(self.game, version)
+
+        # Format it depending on the version
+        if version in {
+            VersionConstants.JUBEAT_PROP,
+            VersionConstants.JUBEAT_QUBELL,
+            VersionConstants.JUBEAT_CLAN,
+            VersionConstants.JUBEAT_FESTO,
+        }:
+            return {
+                "emblems": [
+                    {
+                        "index": str(item.id),
+                        "song": item.data.get_int("music_id"),
+                        "layer": item.data.get_int("layer"),
+                        "evolved": item.data.get_int("evolved"),
+                        "rarity": item.data.get_int("rarity"),
+                        "name": item.data.get_str("name"),
+                    }
+                    for item in items
+                    if item.type == "emblem"
+                ],
+            }
+        else:
+            return {"emblems": []}
 
     def format_score(self, userid: UserID, score: Score) -> Dict[str, Any]:
         formatted_score = super().format_score(userid, score)

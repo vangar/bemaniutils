@@ -4,8 +4,8 @@ var valid_versions = Object.keys(window.versions);
 var pagenav = new History(valid_versions);
 
 var valid_emblem_options = [
-    'main',
     'background',
+    'main',
     'ornament',
     'effect',
     'speech_bubble',
@@ -30,7 +30,6 @@ var settings_view = React.createClass({
             version: version,
             new_name: window.player[version].name,
             editing_name: false,
-            emblems: window.emblems[version],
             emblem_changed: {},
             emblem_saving: {},
             emblem_saved: {},
@@ -39,7 +38,9 @@ var settings_view = React.createClass({
 
     componentDidMount: function() {
         pagenav.onChange(function(version) {
-            this.setState({version: version});
+            this.setState({
+                version: version,
+            });
         }.bind(this));
     },
 
@@ -166,6 +167,7 @@ var settings_view = React.createClass({
                         var src = `/images/jubeat/emblem/${player.emblem[emblem_option]}.png`
                         const divStyle = {
                             position: 'absolute',
+                            zIndex: '-999',
                         }
                         const imageStyle = {
                             width: '256px',
@@ -183,7 +185,7 @@ var settings_view = React.createClass({
                     valid_emblem_options.map(function(emblem_option) {
                         var player = this.state.player[this.state.version]
                         var layer = valid_emblem_options.indexOf(emblem_option) + 1
-                        var items = this.state.emblems.filter(function (emblem) {
+                        var items = window.emblems[this.state.version].filter(function (emblem) {
                             return emblem.layer == layer
                         });
                         var results = {};
@@ -204,7 +206,6 @@ var settings_view = React.createClass({
                                     onChange={function(choice) {
                                         var player = this.state.player;
                                         player[this.state.version].emblem[emblem_option] = choice;
-                                        console.log(player[this.state.version].emblem[emblem_option])
                                         this.setState({
                                             player: player,
                                             emblem_changed: this.setEmblemChanged(true),

@@ -110,8 +110,8 @@ class JubeatFrontend(FrontendBase):
 
     def format_emblem(self, emblem: list) -> Dict[str, Any]:
         return {
-            'main': emblem[0],
-            'background': emblem[1],
+            'background': emblem[0],
+            'main': emblem[1],
             'ornament': emblem[2],
             'effect': emblem[3],
             'speech_bubble': emblem[4],

@@ -319,6 +319,7 @@ def viewsettings() -> Response:
         },
     )
 
+
 @jubeat_pages.route('/options/emblem/update', methods=['POST'])
 @jsonify
 @loginrequired
@@ -356,6 +357,7 @@ def updateemblem() -> Dict[str, Any]:
         'version': version,
         'emblem': frontend.format_emblem(emblem_arr),
     }
+
 
 @jubeat_pages.route('/options/name/update', methods=['POST'])
 @jsonify

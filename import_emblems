@@ -46,6 +46,6 @@ with open(args.xml, 'rb') as xmlhandle:
     xmldata = xmlhandle.read().decode('shift_jisx0213')
 root = ET.fromstring(xmldata)
 
-for emblem in root.findall('emblem'):
+for emblem in root.find('emblem_list'):
     emblem.find('texname').text = emblem.find('texname').text.replace('.tex', '.png')
     os.rename(f'{static_location}/emblems/{emblem.find("texname").text}', f'{static_location}/emblems/{emblem.find("index").text}.png')

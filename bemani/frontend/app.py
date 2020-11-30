@@ -140,6 +140,7 @@ def jsx(filename: str) -> Response:
         g.cache.set(namespace, jsx, timeout=86400 * 365)
     return Response(jsx, mimetype='application/javascript')
 
+
 @app.route('/images/jubeat/emblem/<path:imagename>')
 @cacheable(86400)
 def emblem_iamges(imagename: str):
@@ -147,6 +148,7 @@ def emblem_iamges(imagename: str):
     emblemImage = os.path.join(static_location, f'emblems/{imagename}')
     print(os.path.join(static_location, f'emblems/{imagename}'))
     return send_file(emblemImage, mimetype='image/png')
+
 
 def render_react(
     title: str,

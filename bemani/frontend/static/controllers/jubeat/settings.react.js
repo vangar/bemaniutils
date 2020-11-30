@@ -159,6 +159,26 @@ var settings_view = React.createClass({
         return (
             <div className="section">
                 <h3>Emblem</h3>
+                <div style={{position: 'relative', width: '256px', height: '256px'}}>
+                {
+                    valid_emblem_options.map(function(emblem_option) {
+                        var player = this.state.player[this.state.version]
+                        var src = `/images/jubeat/emblem/${player.emblem[emblem_option]}.png`
+                        const divStyle = {
+                            position: 'absolute',
+                        }
+                        const imageStyle = {
+                            width: '256px',
+                            height: '256px',
+                        }
+                        return (
+                            <div style={divStyle}>
+                                <img style={imageStyle} src={src}/>
+                            </div>
+                        )
+                    }.bind(this))
+                }
+                </div>
                 {
                     valid_emblem_options.map(function(emblem_option) {
                         var player = this.state.player[this.state.version]
@@ -184,6 +204,7 @@ var settings_view = React.createClass({
                                     onChange={function(choice) {
                                         var player = this.state.player;
                                         player[this.state.version].emblem[emblem_option] = choice;
+                                        console.log(player[this.state.version].emblem[emblem_option])
                                         this.setState({
                                             player: player,
                                             emblem_changed: this.setEmblemChanged(true),

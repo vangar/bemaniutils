@@ -338,8 +338,8 @@ def updateemblem() -> Dict[str, Any]:
 
     # Making emblem arr for update
     emblem_arr = [
-        emblem['main'],
         emblem['background'],
+        emblem['main'],
         emblem['ornament'],
         emblem['effect'],
         emblem['speech_bubble'],

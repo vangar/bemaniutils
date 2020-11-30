@@ -297,19 +297,25 @@ def viewsettings() -> Response:
     frontend = JubeatFrontend(g.data, g.config, g.cache)
     userid = g.userID
     info = frontend.get_all_player_info([userid])[userid]
+    versions = sorted(
+        [version for (game, version, name) in frontend.all_games()],
+        reverse=True,
+    )
     if not info:
         abort(404)
 
+    all_emblems = frontend.get_all_items(versions)
     return render_react(
         'Jubeat Game Settings',
         'jubeat/settings.react.js',
         {
             'player': info,
             'versions': {version: name for (game, version, name) in frontend.all_games()},
+            'emblems': all_emblems,
         },
         {
             'updatename': url_for('jubeat_pages.updatename'),
-            'updateemblem': url_for('jubeat_pages.updateemblem'),
+            'updateemblem': url_for('jubeat_pages.updateemblem')
         },
     )
 

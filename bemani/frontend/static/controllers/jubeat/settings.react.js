@@ -30,6 +30,7 @@ var settings_view = React.createClass({
             version: version,
             new_name: window.player[version].name,
             editing_name: false,
+            emblems: window.emblems[version],
             emblem_changed: {},
             emblem_saving: {},
             emblem_saved: {},
@@ -158,32 +159,57 @@ var settings_view = React.createClass({
         return (
             <div className="section">
                 <h3>Emblem</h3>
+                <div style={{position: 'relative', width: '256px', height: '256px'}}>
                 {
                     valid_emblem_options.map(function(emblem_option) {
                         var player = this.state.player[this.state.version]
+                        var src = `/images/jubeat/emblem/${player.emblem[emblem_option]}.png`
+                        const divStyle = {
+                            position: 'absolute',
+                        }
+                        const imageStyle = {
+                            width: '256px',
+                            height: '256px',
+                        }
+                        return (
+                            <div style={divStyle}>
+                                <img style={imageStyle} src={src}/>
+                            </div>
+                        )
+                    }.bind(this))
+                }
+                </div>
+                {
+                    valid_emblem_options.map(function(emblem_option) {
+                        var player = this.state.player[this.state.version]
+                        var layer = valid_emblem_options.indexOf(emblem_option) + 1
+                        var items = this.state.emblems.filter(function (emblem) {
+                            return emblem.layer == layer
+                        });
+                        var results = {};
+                        items
+                            .map(function(item) { return { 'index': item.index, 'name': `${item.name} (★${item.rarity})` } })
+                            .forEach (value => results[value.index] = value.name);
+                        if (layer != 2) {
+                            results[0] = "None"
+                        }
                         return(
                             <div>
                                 <b>{emblem_option_names[emblem_option]}</b>
                                 <br/>
-                                <input
-                                    type="text"
-                                    className="inline"
-                                    maxlength="4"
-                                    size="4"
-                                    value={player.emblem[emblem_option]}
-                                    onChange={function(event) {
-                                        var player = this.state.player;
-                                        var value = event.target.value
-                                        var numberRegex = /^[0-9]*$/;
-                                        if (value.length <= 4 && numberRegex.test(value)) {
-                                            player[this.state.version].emblem[emblem_option] = Number(value)
-                                            this.setState({
-                                                player: player,
-                                                emblem_changed: this.setEmblemChanged(true),
-                                            })
-                                        }
-                                    }.bind(this)}
+                                <SelectInt
                                     name={emblem_option}
+                                    value={player.emblem[emblem_option]}
+                                    choices={results}
+                                    onChange={function(choice) {
+                                        var player = this.state.player;
+                                        player[this.state.version].emblem[emblem_option] = choice;
+                                        console.log(player[this.state.version].emblem[emblem_option])
+                                        this.setState({
+                                            player: player,
+                                            emblem_changed: this.setEmblemChanged(true),
+                                        })
+                                    }.bind(this)}
                                 />
                                 <br/>
                             </div>

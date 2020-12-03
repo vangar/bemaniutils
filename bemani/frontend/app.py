@@ -143,7 +143,7 @@ def jsx(filename: str) -> Response:
 
 @app.route('/images/jubeat/emblem/<path:imagename>')
 @cacheable(86400)
-def emblem_iamges(imagename: str):
+def emblem_images(imagename: str) -> Response:
     # Find path for filename
     emblemImage = os.path.join(static_location, f'emblems/{imagename}')
     print(os.path.join(static_location, f'emblems/{imagename}'))

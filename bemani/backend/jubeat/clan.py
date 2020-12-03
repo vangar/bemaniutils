@@ -1840,7 +1840,7 @@ class JubeatClan(
 
                 # Miscelaneous last data for echoing to profile get
                 last.replace_int('music_id', songid)
-                last.replace_int('seq_id', chart)
+                last.replace_int('seq_id', int(result.child('score').attribute('seq')))
 
                 mapping = {
                     self.GAME_FLAG_BIT_CLEARED: self.PLAY_MEDAL_CLEARED,

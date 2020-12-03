@@ -42,14 +42,14 @@ class JubeatFrontend(FrontendBase):
             if version in mapping:
                 yield (game, mapping[version], name)
 
-    def get_all_items(self, versions) -> Dict[str, List[Dict[str, Any]]]:
+    def get_all_items(self, versions: list) -> Dict[str, List[Dict[str, Any]]]:
         result = {}
         for version in versions:
             emblem = self.__format_jubeat_extras(version)
             result[version] = emblem['emblems']
         return result
 
-    def __format_jubeat_extras(self, version) -> Dict[str, List[Dict[str, Any]]]:
+    def __format_jubeat_extras(self, version: int) -> Dict[str, List[Dict[str, Any]]]:
         # Gotta look up the unlock catalog
         items = self.data.local.game.get_items(self.game, version)
 

@@ -1334,7 +1334,6 @@ class ImportJubeat(ImportBase):
                 'clan': VersionConstants.JUBEAT_CLAN,
                 'festo': VersionConstants.JUBEAT_FESTO,
             }.get(version, -1)
-            print(actual_version)
         elif version in ['omni-prop', 'omni-qubell', 'omni-clan', 'omni-festo']:
             actual_version = {
                 'omni-prop': VersionConstants.JUBEAT_PROP,
@@ -1342,7 +1341,6 @@ class ImportJubeat(ImportBase):
                 'omni-clan': VersionConstants.JUBEAT_CLAN,
                 'omni-festo': VersionConstants.JUBEAT_FESTO,
             }.get(version, -1) + DBConstants.OMNIMIX_VERSION_BUMP
-            print(actual_version)
 
         elif version == 'all':
             actual_version = None
@@ -3415,12 +3413,17 @@ class ImportMuseca(ImportBase):
         no_combine: bool,
         update: bool,
     ) -> None:
-        actual_version = {
-            '1': VersionConstants.MUSECA,
-            '1+1/2': VersionConstants.MUSECA_1_PLUS,
-        }.get(version, -1)
+        if version in ['1', '1+1/2']:
+            actual_version = {
+                '1': VersionConstants.MUSECA,
+                '1+1/2': VersionConstants.MUSECA_1_PLUS,
+            }.get(version, -1)
+        elif version == 'plus':
+            actual_version = VersionConstants.MUSECA_1_PLUS + DBConstants.OMNIMIX_VERSION_BUMP
 
         if actual_version in [VersionConstants.MUSECA, VersionConstants.MUSECA_1_PLUS]:
+            self.charts = [0, 1, 2, 3]
+        elif actual_version == VersionConstants.MUSECA_1_PLUS + DBConstants.OMNIMIX_VERSION_BUMP:
             self.charts = [0, 1, 2, 3]
         else:
             raise Exception("Unsupported Museca version, expected one of the following: 1, 1+1/2!")

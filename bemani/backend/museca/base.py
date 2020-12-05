@@ -33,6 +33,19 @@ class MusecaBase(CoreHandler, CardManagerHandler, PASELIHandler, Base):
     CLEAR_TYPE_CLEARED = DBConstants.MUSECA_CLEAR_TYPE_CLEARED
     CLEAR_TYPE_FULL_COMBO = DBConstants.MUSECA_CLEAR_TYPE_FULL_COMBO
 
+    def __init__(self, data: Data, config: Dict[str, Any], model: Model) -> None:
+        super().__init__(data, config, model)
+        if model.rev == 'X':
+            self.omnimix = True
+        else:
+            self.omnimix = False
+
+    @property
+    def music_version(self) -> int:
+        if self.omnimix:
+            return DBConstants.OMNIMIX_VERSION_BUMP + self.version
+        return self.version
+
     def previous_version(self) -> Optional['MusecaBase']:
         """
         Returns the previous version of the game, based on this game. Should
@@ -128,11 +141,11 @@ class MusecaBase(CoreHandler, CardManagerHandler, PASELIHandler, Base):
         all_attempts, remote_attempts = Parallel.execute([
             lambda: self.data.local.music.get_all_attempts(
                 game=self.game,
-                version=self.version,
+                version=self.music_version,
             ),
             lambda: self.data.remote.music.get_clear_rates(
                 game=self.game,
-                version=self.version,
+                version=self.music_version,
             )
         ])
         attempts: Dict[int, Dict[int, Dict[str, int]]] = {}
@@ -214,7 +227,7 @@ class MusecaBase(CoreHandler, CardManagerHandler, PASELIHandler, Base):
         if userid is not None:
             oldscore = self.data.local.music.get_score(
                 self.game,
-                self.version,
+                self.music_version,
                 userid,
                 songid,
                 chart,
@@ -262,7 +275,7 @@ class MusecaBase(CoreHandler, CardManagerHandler, PASELIHandler, Base):
             # Write the new score back
             self.data.local.music.put_score(
                 self.game,
-                self.version,
+                self.music_version,
                 userid,
                 songid,
                 chart,
@@ -275,7 +288,7 @@ class MusecaBase(CoreHandler, CardManagerHandler, PASELIHandler, Base):
         # Save the history of this score too
         self.data.local.music.put_attempt(
             self.game,
-            self.version,
+            self.music_version,
             userid,
             songid,
             chart,

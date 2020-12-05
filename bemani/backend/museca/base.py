@@ -1,10 +1,10 @@
 # vim: set fileencoding=utf-8
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 
 from bemani.backend.base import Base
 from bemani.backend.core import CoreHandler, CardManagerHandler, PASELIHandler
-from bemani.common import ValidatedDict, GameConstants, DBConstants, Parallel
-from bemani.data import UserID
+from bemani.common import ValidatedDict, GameConstants, DBConstants, Parallel, Model
+from bemani.data import UserID, Data
 from bemani.protocol import Node
 
 

@@ -152,6 +152,11 @@ class Museca1Plus(
 
         if not game_config.get_bool('disable_matching'):
             enable_event(143)  # Matching enabled
+        # These events are meant specifically for Museca Plus
+        museca_plus_events = [
+            140,  # Agetta Moratta (vmlink_phase 3 in musicdb)
+            211,  # News 1
+        ]
         event_ids = [
             1,    # Extended pedal options
             56,   # Generator grafica icon <print 1 in musicdb>
@@ -160,7 +165,6 @@ class Museca1Plus(
             98,   # Caption 2 notice (grs_grafica_caption_2.png)
             105,  # Makes the "Number of Layers" option visible in game settings
             130,  # Curator Rank
-            140,  # Agetta Moratta (vmlink_phase 3 in musicdb)
             141,  # Coconatsu & Mukipara grafica effects
             145,  # MUKIPARA UNLOCKS
             146,  # MUKIPARA UNLOCKS
@@ -168,12 +172,13 @@ class Museca1Plus(
             148,  # MUKIPARA UNLOCKS
             149,  # MUKIPARA UNLOCKS
             195,  # Fictional Curator (foot pedal options)
-            211,  # News 1
         ]
 
         for evtid in event_ids:
             enable_event(evtid)  # Mission stuff
-
+        if self.omnimix:
+            for evtid in museca_plus_events:
+                enable_event(evtid)
         return game
 
     def handle_game_3_lounge_request(self, request: Node) -> Node:

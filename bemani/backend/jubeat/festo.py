@@ -849,7 +849,7 @@ class JubeatFesto(
                     seq_list.add_child(seq)
                     seq.add_child(Node.s32('music_id', songid))
                     seq.add_child(Node.s32('difficulty', chart))
-                    seq.add_child(Node.bool('is_secret', False))
+                    seq.add_child(Node.bool('is_secret', False))  # TODO: make this an attribute in course definition
 
             # Clear criteria
             clear = Node.void('clear')

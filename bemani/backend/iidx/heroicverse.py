@@ -84,10 +84,35 @@ class IIDXHeroicVerse(IIDXCourse, IIDXBase):
     GAME_DP_DAN_RANK_CHUDEN = 17
     GAME_DP_DAN_RANK_KAIDEN = 18
 
+    GAME_CHART_TYPE_B7 = 0
+    GAME_CHART_TYPE_N7 = 1
+    GAME_CHART_TYPE_H7 = 2
+    GAME_CHART_TYPE_A7 = 3
+    GAME_CHART_TYPE_L7 = 4
+    GAME_CHART_TYPE_B14 = 5  # THere are no B14 charts in the game but this would be the id if there were
+    GAME_CHART_TYPE_N14 = 6
+    GAME_CHART_TYPE_H14 = 7
+    GAME_CHART_TYPE_A14 = 8
+    GAME_CHART_TYPE_L14 = 9
+
     FAVORITE_LIST_LENGTH = 20
 
     def previous_version(self) -> Optional[IIDXBase]:
         return IIDXRootage(self.data, self.config, self.model)
+
+    def game_to_db_chart(self, db_chart: int) -> int:
+        return {
+            self.GAME_CHART_TYPE_B7: self.CHART_TYPE_B7,
+            self.GAME_CHART_TYPE_N7: self.CHART_TYPE_N7,
+            self.GAME_CHART_TYPE_H7: self.CHART_TYPE_H7,
+            self.GAME_CHART_TYPE_A7: self.CHART_TYPE_A7,
+            self.GAME_CHART_TYPE_L7: self.CHART_TYPE_L7,
+            self.GAME_CHART_TYPE_B14: self.CHART_TYPE_B14,
+            self.GAME_CHART_TYPE_N14: self.CHART_TYPE_N14,
+            self.GAME_CHART_TYPE_H14: self.CHART_TYPE_H14,
+            self.GAME_CHART_TYPE_A14: self.CHART_TYPE_A14,
+            self.GAME_CHART_TYPE_L14: self.CHART_TYPE_L14,
+        }[db_chart]
 
     @classmethod
     def run_scheduled_work(cls, data: Data, config: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
@@ -413,7 +438,7 @@ class IIDXHeroicVerse(IIDXCourse, IIDXBase):
     def handle_IIDX27ranking_getranker_request(self, request: Node) -> Node:
         root = Node.void('IIDX27ranking')
         game_chart = int(request.attribute('clid'))
-        chart = self.chart_map.get(game_chart)
+        chart = self.game_to_db_chart(game_chart)
 
         machine = self.data.local.machine.get_machine(self.config['machine']['pcbid'])
         if machine.arcade is not None:
@@ -496,7 +521,7 @@ class IIDXHeroicVerse(IIDXCourse, IIDXBase):
         extid = int(request.attribute('iidxid'))
         courseid = int(request.attribute('coid'))
         game_chart = int(request.attribute('clid'))
-        chart = self.chart_map.get(game_chart)
+        chart = self.game_to_db_chart(game_chart)
         course_type = int(request.attribute('regist_type'))
         clear_status = self.game_to_db_status(int(request.attribute('clr')))
         pgreats = int(request.attribute('pgnum'))
@@ -628,7 +653,7 @@ class IIDXHeroicVerse(IIDXCourse, IIDXBase):
     def handle_IIDX27music_appoint_request(self, request: Node) -> Node:
         musicid = int(request.attribute('mid'))
         game_chart = int(request.attribute('clid'))
-        chart = self.chart_map.get(game_chart)
+        chart = self.game_to_db_chart(game_chart)
         ghost_type = int(request.attribute('ctype'))
         extid = int(request.attribute('iidxid'))
         userid = self.data.remote.user.from_extid(self.game, self.version, extid)
@@ -681,7 +706,7 @@ class IIDXHeroicVerse(IIDXCourse, IIDXBase):
         musicid = int(request.attribute('mid'))
         game_chart = int(request.attribute('clid'))
         userid = self.data.remote.user.from_extid(self.game, self.version, extid)
-        chart = self.chart_map.get(game_chart)
+        chart = self.game_to_db_chart(game_chart)
         # See if we need to report global or shop scores
         if self.machine_joined_arcade():
             game_config = self.get_game_config()
@@ -849,7 +874,7 @@ class IIDXHeroicVerse(IIDXCourse, IIDXBase):
         musicid = int(request.attribute('mid'))
         game_chart = int(request.attribute('clid'))
         clear_status = self.game_to_db_status(int(request.attribute('cflg')))
-        chart = self.chart_map.get(game_chart)
+        chart = self.game_to_db_chart(game_chart)
         self.update_score(
             None,  # No userid since its anonymous
             musicid,

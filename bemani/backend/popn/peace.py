@@ -16,6 +16,8 @@ class PopnMusicPeace(PopnMusicBase):
     name = "Pop'n Music peace"
     version = VersionConstants.POPN_MUSIC_PEACE
 
+    # Catalog types
+    GAME_CATALOG_TYPE_SONG = 0
     # Chart type, as returned from the game
     GAME_CHART_TYPE_EASY = 0
     GAME_CHART_TYPE_NORMAL = 1
@@ -46,7 +48,23 @@ class PopnMusicPeace(PopnMusicBase):
     GAME_PLAY_RANK_S = 8
 
     # Biggest ID in the music DB
-    GAME_MAX_MUSIC_ID = 1780
+    GAME_MAX_MUSIC_ID = 1877
+
+    @classmethod
+    def get_settings(cls) -> Dict[str, Any]:
+        """
+        Return all of our front-end modifiably settings.
+        """
+        return {
+            'bools': [
+                {
+                    'name': 'Force Song Unlock',
+                    'tip': 'Force unlock all songs.',
+                    'category': 'game_config',
+                    'setting': 'force_unlock_songs',
+                },
+            ],
+        }
 
     def previous_version(self) -> Optional[PopnMusicBase]:
         return PopnMusicUsaNeko(self.data, self.config, self.model)
@@ -934,10 +952,14 @@ class PopnMusicPeace(PopnMusicBase):
             navi_data.add_child(Node.s32_array('raisePoint', profile.get_int_array('navi_points', 5)))
 
         # Set up achievements
+        game_config = self.get_game_config()
         achievements = self.data.local.user.get_achievements(self.game, self.version, userid)
         for achievement in achievements:
             if achievement.type[:5] == 'item_':
                 itemtype = int(achievement.type[5:])
+                if game_config.get_bool('force_unlock_songs') and itemtype == self.GAME_CATALOG_TYPE_SONG:
+                    # Don't echo unlocked songs, we will add all of them later
+                    continue
                 param = achievement.data.get_int('param')
                 is_new = achievement.data.get_bool('is_new')
                 get_time = achievement.data.get_int('get_time')
@@ -950,7 +972,7 @@ class PopnMusicPeace(PopnMusicBase):
                 # seen 8 and 0. Might be what chart is available?
                 #
                 # Item limits are as follows:
-                # 0: 1704
+                # 0: 1877
                 # 1: 2201
                 # 2: 3
                 # 3: 97
@@ -1020,6 +1042,29 @@ class PopnMusicPeace(PopnMusicBase):
                 fes.add_child(Node.u8('chapter_index', index))
                 fes.add_child(Node.u16('gauge_point', points))
                 fes.add_child(Node.bool('is_cleared', cleared))
+
+        if game_config.get_bool('force_unlock_songs'):
+            ids: Dict[int, int] = {}
+            songs = self.data.local.music.get_all_songs(self.game, self.version)
+            for song in songs:
+                if song.id not in ids:
+                    ids[song.id] = 0
+
+                if song.data.get_int('difficulty') > 0:
+                    ids[song.id] = ids[song.id] | (1 << song.chart)
+
+            for itemid in ids:
+                if ids[itemid] == 0:
+                    continue
+
+                item = Node.void('item')
+                root.add_child(item)
+                info = Node.void('info')
+                item.add_child(Node.u8('type', self.GAME_CATALOG_TYPE_SONG))
+                item.add_child(Node.u16('id', itemid))
+                item.add_child(Node.u16('param', ids[itemid]))
+                item.add_child(Node.bool('is_new', False))
+                item.add_child(Node.u64('get_time', Time.now()))
 
         # Handle daily mission
         achievements = self.data.local.user.get_time_based_achievements(
@@ -1223,6 +1268,9 @@ class PopnMusicPeace(PopnMusicBase):
                         },
                     )
 
+        # Update user's unlock status if we aren't force unlocked
+        game_config = self.get_game_config()
+
         # Extract achievements
         for node in request.children:
             if node.name == 'item':
@@ -1231,6 +1279,10 @@ class PopnMusicPeace(PopnMusicBase):
                 param = node.child_value('param')
                 is_new = node.child_value('is_new')
                 get_time = node.child_value('get_time')
+
+                if game_config.get_bool('force_unlock_songs') and itemtype == self.GAME_CATALOG_TYPE_SONG:
+                    # Don't save back songs, because they were force unlocked
+                    continue
 
                 self.data.local.user.put_achievement(
                     self.game,

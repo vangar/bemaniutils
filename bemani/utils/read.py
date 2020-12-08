@@ -981,27 +981,16 @@ class ImportPopn(ImportBase):
                     mask & 0x4000000 > 0,  # Battle hyper chart bit
                 )
         elif self.version == VersionConstants.POPN_MUSIC_PEACE:
-            # Based on M39:J:A:A:2019062500
+            # Based on M39:J:A:A:2020092800
 
             # Normal offset for music DB, size
-            offset = 0x2B8C20
+            offset = 0x2C7C78
             step = 172
-            length = 1795
+            length = 1877
 
             # Offset and step of file DB
-            file_offset = 0x2A9AF8
+            file_offset = 0x2B8010
             file_step = 32
-
-            # Based on M39:J:A:A:2019042300 (commented out since this is most common datecode)
-
-            # Normal offset for music DB, size
-            # offset = 0x2B3840
-            # step = 172
-            # length = 1780
-
-            # # Offset and step of file DB
-            # file_offset = 0x2A48F8
-            # file_step = 32
 
             # Standard lookups
             genre_offset = 0

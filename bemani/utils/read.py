@@ -1501,6 +1501,7 @@ class ImportJubeat(ImportBase):
         legacy_to_modern_map = {
             71000001: 70000124,
             71000002: 70000154,
+            50000020: 80000037,
         }
 
         legacy_songid = legacy_to_modern_map.get(songid)
@@ -1511,6 +1512,7 @@ class ImportJubeat(ImportBase):
         modern_to_legacy_map = {
             70000124: 71000001,
             70000154: 71000002,
+            80000037: 50000020,
         }
 
         modern_songid = modern_to_legacy_map.get(songid)

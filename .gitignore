@@ -15,4 +15,4 @@ bemani.egg-info/
 server/
 .vscode/
 .DS_Store
-bemani/frontend/static/emblems/
+emblems

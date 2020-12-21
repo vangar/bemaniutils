@@ -185,8 +185,11 @@ class CatalogObject(BaseObject):
 
     @property
     def music_version(self) -> int:
-        if self.omnimix:
-            return self.version + DBConstants.OMNIMIX_VERSION_BUMP
+        if self.game in [GameConstants.IIDX, GameConstants.MUSECA, GameConstants.JUBEAT]:
+            if self.omnimix:
+                return self.version + DBConstants.OMNIMIX_VERSION_BUMP
+            else:
+                return self.version
         else:
             return self.version
 

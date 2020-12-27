@@ -2143,7 +2143,7 @@ class ImportIIDX(ImportBase):
             qp_head_offset = 0x82E6B0    # qpro body parts are stored in 5 separate arrays in the game data, since there can be collision in
             qp_head_length = 290         # the qpro id numbers, it's best to store them as separate types in the catalog as well.
             qp_hair_offset = 0x82F8D0
-            qp_hair_length = 290
+            qp_hair_length = 312
             qp_face_offset = 0x82AFB0
             qp_face_length = 215
             qp_hand_offset = 0x82BD20

@@ -3548,8 +3548,11 @@ class ImportReflecBeat(ImportBase):
                 '7': VersionConstants.REFLEC_BEAT_REFLESIA,
             }[version]
             self.charts = [0, 1, 2, 3]
+        elif version == 'omni-6':
+            self.charts = [0, 1, 2, 3]
+            actual_version = VersionConstants.REFLEC_BEAT_VOLZZA_2 + DBConstants.OMNIMIX_VERSION_BUMP
         else:
-            raise Exception("Unsupported ReflecBeat version, expected one of the following: 1, 2, 3, 4, 5, 6, 7")
+            raise Exception("Unsupported ReflecBeat version, expected one of the following: 1, 2, 3, 4, 5, 6, omni-6, 7")
 
         super().__init__(config, GameConstants.REFLEC_BEAT, actual_version, no_combine, update)
 
@@ -3630,7 +3633,7 @@ class ImportReflecBeat(ImportBase):
             chart_offset = 0x1E4
             chart_length = 0x20
             difficulties_offset = 0x1CC
-        elif self.version == VersionConstants.REFLEC_BEAT_VOLZZA_2:
+        elif self.version in [VersionConstants.REFLEC_BEAT_VOLZZA_2, VersionConstants.REFLEC_BEAT_VOLZZA_2 + DBConstants.OMNIMIX_VERSION_BUMP]:
             # Based on MBR:J:A:A:2016100400
             offset = 0x1CBC68
             stride = 552

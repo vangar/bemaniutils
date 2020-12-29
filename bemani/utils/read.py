@@ -1544,7 +1544,7 @@ class ImportJubeat(ImportBase):
             for chart in self.charts:
                 if(chart <= 2):
                     # First, try to find in the DB from another version
-                    old_id = old_id = self.__revivals(songid, chart)
+                    old_id = self.__revivals(songid, chart)
                     if self.no_combine or old_id is None:
                         # Insert original
                         print(f"New entry for {songid} chart {chart}")
@@ -1560,7 +1560,7 @@ class ImportJubeat(ImportBase):
                     }
                 else:
                     # First, try to find in the DB from another version
-                    old_id = self.get_music_id_for_song(songid, chart)
+                    old_id = self.__revivals(songid, chart)
                     if self.no_combine or old_id is None:
                         # Insert original
                         print(f"New entry for {songid} chart {chart}")

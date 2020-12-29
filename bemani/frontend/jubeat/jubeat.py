@@ -41,6 +41,7 @@ class JubeatFrontend(FrontendBase):
         for (game, version, name) in self.all_games():
             if version in mapping:
                 yield (game, mapping[version], name)
+        yield (GameConstants.JUBEAT, 10, 'Jubeat Extend')
 
     def get_all_items(self, versions: list) -> Dict[str, List[Dict[str, Any]]]:
         result = {}

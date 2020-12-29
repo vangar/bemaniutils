@@ -1383,9 +1383,10 @@ class ImportJubeat(ImportBase):
                 int(music_entry.find('level_ext').text),
             ]
             genre = "other"
-            for possible_genre in music_entry.find('genre'):
-                if int(possible_genre.text) != 0:
-                    genre = str(possible_genre.tag)
+            if music_entry.find('genre') is not None: # Qubell extend music_info doesn't have this field
+                for possible_genre in music_entry.find('genre'):
+                    if int(possible_genre.text) != 0:
+                        genre = str(possible_genre.tag)
 
             songs.append({
                 'id': songid,

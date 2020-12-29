@@ -142,6 +142,9 @@ var network_records = React.createClass({
         var lastSeries = 0;
         for (var i = 0; i < songids.length; i++) {
             var curSeries = Math.floor(songids[i] / 10000000);
+            if (curSeries >= 10) {
+                curSeries = 10; // Special case for jubeat qubell extend songs. 
+            }
             if (curSeries != lastSeries) {
                 lastSeries = curSeries;
                 songids.splice(i, 0, curSeries);

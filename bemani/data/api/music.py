@@ -359,6 +359,7 @@ class GlobalMusicData(BaseGlobalData):
                 'ghost': oldscore.data.get('ghost') if oldscore.points > newscore.points else newscore.data.get('ghost'),
                 'combo': self.__max(oldscore.data['combo'], newscore.data['combo']),
                 'medal': self.__max(oldscore.data['medal'], newscore.data['medal']),
+                'music_rate': self.__max(oldscore.data['music_rate'], newscore.data['music_rate'])
             },
         )
 

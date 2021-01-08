@@ -585,9 +585,17 @@ class AFPFile:
                                     f"{self.endian}H",
                                     raw_data[(64 + (i * 2)):(66 + (i * 2))],
                                 )[0]
+
+                                # Extract the raw values
                                 red = ((pixel >> 0) & 0x1F) << 3
                                 green = ((pixel >> 5) & 0x3F) << 2
                                 blue = ((pixel >> 11) & 0x1F) << 3
+
+                                # Scale the colors so they fill the entire 8 bit range.
+                                red = red | (red >> 5)
+                                green = green | (green >> 6)
+                                blue = blue | (blue >> 5)
+
                                 newdata.append(
                                     struct.pack("<BBB", blue, green, red)
                                 )
@@ -614,10 +622,18 @@ class AFPFile:
                                     f"{self.endian}H",
                                     raw_data[(64 + (i * 2)):(66 + (i * 2))],
                                 )[0]
+
+                                # Extract the raw values
                                 alpha = 255 if ((pixel >> 15) & 0x1) != 0 else 0
                                 red = ((pixel >> 0) & 0x1F) << 3
                                 green = ((pixel >> 5) & 0x1F) << 3
                                 blue = ((pixel >> 10) & 0x1F) << 3
+
+                                # Scale the colors so they fill the entire 8 bit range.
+                                red = red | (red >> 5)
+                                green = green | (green >> 5)
+                                blue = blue | (blue >> 5)
+
                                 newdata.append(
                                     struct.pack("<BBBB", blue, green, red, alpha)
                                 )
@@ -633,11 +649,14 @@ class AFPFile:
                             )
                         elif fmt == 0x16:
                             # DXT1 format. Game references D3D9 DXT1 texture format.
+                            # Konami seems to have screwed up with DDR PS3 where they
+                            # swap every other byte in the format, even though its specified
+                            # as little-endian by all DXT1 documentation.
                             dxt = DXTBuffer(width, height)
                             img = Image.frombuffer(
                                 'RGBA',
                                 (width, height),
-                                dxt.DXT1Decompress(raw_data[64:], endian=self.endian),
+                                dxt.DXT1Decompress(raw_data[64:], swap=self.endian != "<"),
                                 'raw',
                                 'RGBA',
                                 0,
@@ -645,11 +664,14 @@ class AFPFile:
                             )
                         elif fmt == 0x1A:
                             # DXT5 format. Game references D3D9 DXT5 texture format.
+                            # Konami seems to have screwed up with DDR PS3 where they
+                            # swap every other byte in the format, even though its specified
+                            # as little-endian by all DXT5 documentation.
                             dxt = DXTBuffer(width, height)
                             img = Image.frombuffer(
                                 'RGBA',
                                 (width, height),
-                                dxt.DXT5Decompress(raw_data[64:], endian=self.endian),
+                                dxt.DXT5Decompress(raw_data[64:], swap=self.endian != "<"),
                                 'raw',
                                 'RGBA',
                                 0,
@@ -668,10 +690,19 @@ class AFPFile:
                                     f"{self.endian}H",
                                     raw_data[(64 + (i * 2)):(66 + (i * 2))],
                                 )[0]
+
+                                # Extract the raw values
                                 blue = ((pixel >> 0) & 0xF) << 4
                                 green = ((pixel >> 4) & 0xF) << 4
                                 red = ((pixel >> 8) & 0xF) << 4
                                 alpha = ((pixel >> 12) & 0xF) << 4
+
+                                # Scale the colors so they fill the entire 8 bit range.
+                                red = red | (red >> 4)
+                                green = green | (green >> 4)
+                                blue = blue | (blue >> 4)
+                                alpha = alpha | (alpha >> 4)
+
                                 newdata.append(
                                     struct.pack("<BBBB", red, green, blue, alpha)
                                 )

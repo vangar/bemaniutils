@@ -324,7 +324,7 @@ class PopnMusicPeace(PopnMusicBase):
             popular.add_child(Node.s16('chara_num', charaid))
 
         # Top 500 Popular music
-        for (songid, plays) in self.data.local.music.get_hit_chart(self.game, self.version, 500):
+        for (songid, plays) in self.data.local.music.get_hit_chart(self.game, self.music_version, 500):
             popular_music = Node.void('popular_music')
             root.add_child(popular_music)
             popular_music.add_child(Node.s16('music_num', songid))
@@ -549,7 +549,7 @@ class PopnMusicPeace(PopnMusicBase):
             return root
         rivalid = links[no].other_userid
         rivalprofile = profiles[rivalid]
-        scores = self.data.remote.music.get_scores(self.game, self.version, rivalid)
+        scores = self.data.remote.music.get_scores(self.game, self.music_version, rivalid)
 
         # First, output general profile info.
         friend = Node.void('friend')
@@ -623,7 +623,7 @@ class PopnMusicPeace(PopnMusicBase):
             return Node.void('player24')
 
         root = Node.void('player24')
-        scores = self.data.remote.music.get_scores(self.game, self.version, userid)
+        scores = self.data.remote.music.get_scores(self.game, self.music_version, userid)
         for score in scores:
             # Skip any scores for chart types we don't support
             if score.chart not in [
@@ -759,7 +759,7 @@ class PopnMusicPeace(PopnMusicBase):
         root.add_child(Node.s8('result', 1))
 
         # Scores
-        scores = self.data.remote.music.get_scores(self.game, self.version, userid)
+        scores = self.data.remote.music.get_scores(self.game, self.music_version, userid)
         for score in scores:
             # Skip any scores for chart types we don't support
             if score.chart not in [
@@ -843,8 +843,8 @@ class PopnMusicPeace(PopnMusicBase):
         account.add_child(Node.s16_array('license_data', [-1] * 20))
 
         # Song statistics
-        last_played = [x[0] for x in self.data.local.music.get_last_played(self.game, self.version, userid, 10)]
-        most_played = [x[0] for x in self.data.local.music.get_most_played(self.game, self.version, userid, 20)]
+        last_played = [x[0] for x in self.data.local.music.get_last_played(self.game, self.music_version, userid, 10)]
+        most_played = [x[0] for x in self.data.local.music.get_most_played(self.game, self.music_version, userid, 20)]
         while len(last_played) < 10:
             last_played.append(-1)
         while len(most_played) < 20:
@@ -1045,7 +1045,7 @@ class PopnMusicPeace(PopnMusicBase):
 
         if game_config.get_bool('force_unlock_songs'):
             ids: Dict[int, int] = {}
-            songs = self.data.local.music.get_all_songs(self.game, self.version)
+            songs = self.data.local.music.get_all_songs(self.game, self.music_version)
             for song in songs:
                 if song.id not in ids:
                     ids[song.id] = 0
@@ -1099,7 +1099,7 @@ class PopnMusicPeace(PopnMusicBase):
             mission.add_child(Node.u32('mission_comp', complete))
 
         # Scores
-        scores = self.data.remote.music.get_scores(self.game, self.version, userid)
+        scores = self.data.remote.music.get_scores(self.game, self.music_version, userid)
         for score in scores:
             # Skip any scores for chart types we don't support
             if score.chart not in [

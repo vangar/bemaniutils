@@ -367,15 +367,22 @@ class ImportPopn(ImportBase):
         no_combine: bool,
         update: bool,
     ) -> None:
-        actual_version = {
-            '19': VersionConstants.POPN_MUSIC_TUNE_STREET,
-            '20': VersionConstants.POPN_MUSIC_FANTASIA,
-            '21': VersionConstants.POPN_MUSIC_SUNNY_PARK,
-            '22': VersionConstants.POPN_MUSIC_LAPISTORIA,
-            '23': VersionConstants.POPN_MUSIC_ECLALE,
-            '24': VersionConstants.POPN_MUSIC_USANEKO,
-            '25': VersionConstants.POPN_MUSIC_PEACE,
-        }.get(version, -1)
+        if version in ['19', '20', '21', '22', '23', '24', '25', '26']:
+            actual_version = {
+                '19': VersionConstants.POPN_MUSIC_TUNE_STREET,
+                '20': VersionConstants.POPN_MUSIC_FANTASIA,
+                '21': VersionConstants.POPN_MUSIC_SUNNY_PARK,
+                '22': VersionConstants.POPN_MUSIC_LAPISTORIA,
+                '23': VersionConstants.POPN_MUSIC_ECLALE,
+                '24': VersionConstants.POPN_MUSIC_USANEKO,
+                '25': VersionConstants.POPN_MUSIC_PEACE,
+                '26': VersionConstants.POPN_MUSIC_KAIMEI_RIDDLES,
+            }.get(version, -1)
+        elif version in ['omni-24', 'omni-25']:
+            actual_version = {
+                'omni-24': VersionConstants.POPN_MUSIC_USANEKO,
+                'omni-25': VersionConstants.POPN_MUSIC_PEACE,
+            }.get(version, -1) + DBConstants.OMNIMIX_VERSION_BUMP
 
         if actual_version == VersionConstants.POPN_MUSIC_TUNE_STREET:
             # Pop'n 19 has extra charts for old play modes (challenge and enjoy mode).
@@ -386,7 +393,7 @@ class ImportPopn(ImportBase):
             # Newer pop'n has charts for easy, normal, hyper, another
             self.charts = [0, 1, 2, 3]
         else:
-            raise Exception("Unsupported Pop'n Music version, expected one of the following: 19, 20, 21, 22, 23, 24, 25!")
+            raise Exception("Unsupported Pop'n Music version, expected one of the following: 19, 20, 21, 22, 23, 24, omni-24, 25, omni-25, 26!")
 
         super().__init__(config, GameConstants.POPN_MUSIC, actual_version, no_combine, update)
 
@@ -405,8 +412,8 @@ class ImportPopn(ImportBase):
                 if offset >= start and offset < end:
                     return (offset - start) + section.PointerToRawData
             raise Exception(f'Couldn\'t find raw offset for virtual offset 0x{offset:08x}')
-
-        if self.version == VersionConstants.POPN_MUSIC_TUNE_STREET:
+        game_version = self.version if self.version < 10000 else self.version - 10000
+        if game_version == VersionConstants.POPN_MUSIC_TUNE_STREET:
             # Based on K39:J:A:A:2010122200
 
             # Normal offset for music DB, size
@@ -501,7 +508,7 @@ class ImportPopn(ImportBase):
                     True,  # Always a battle normal chart
                     mask & 0x4000000 > 0,  # Battle hyper chart bit
                 )
-        elif self.version == VersionConstants.POPN_MUSIC_FANTASIA:
+        elif game_version == VersionConstants.POPN_MUSIC_FANTASIA:
             # Based on L39:J:A:A:2012091900
 
             # Normal offset for music DB, size
@@ -596,7 +603,7 @@ class ImportPopn(ImportBase):
                     True,  # Always a battle normal chart
                     mask & 0x4000000 > 0,  # Battle hyper chart bit
                 )
-        elif self.version == VersionConstants.POPN_MUSIC_SUNNY_PARK:
+        elif game_version == VersionConstants.POPN_MUSIC_SUNNY_PARK:
             # Based on M39:J:A:A:2014061900
 
             # Normal offset for music DB, size
@@ -692,7 +699,7 @@ class ImportPopn(ImportBase):
                     True,  # Always a battle normal chart
                     mask & 0x4000000 > 0,  # Battle hyper chart bit
                 )
-        elif self.version == VersionConstants.POPN_MUSIC_LAPISTORIA:
+        elif game_version == VersionConstants.POPN_MUSIC_LAPISTORIA:
             # Based on M39:J:A:A:2015081900
 
             # Normal offset for music DB, size
@@ -787,7 +794,7 @@ class ImportPopn(ImportBase):
                     True,  # Always a battle normal chart
                     mask & 0x4000000 > 0,  # Battle hyper chart bit
                 )
-        elif self.version == VersionConstants.POPN_MUSIC_ECLALE:
+        elif game_version == VersionConstants.POPN_MUSIC_ECLALE:
             # Based on M39:J:A:A:2016100500
 
             # Normal offset for music DB, size
@@ -883,7 +890,7 @@ class ImportPopn(ImportBase):
                     True,  # Always a battle normal chart
                     mask & 0x4000000 > 0,  # Battle hyper chart bit
                 )
-        elif self.version == VersionConstants.POPN_MUSIC_USANEKO:
+        elif game_version == VersionConstants.POPN_MUSIC_USANEKO:
             # Based on M39:J:A:A:2018082100
 
             # Normal offset for music DB, size
@@ -980,7 +987,7 @@ class ImportPopn(ImportBase):
                     True,  # Always a battle normal chart
                     mask & 0x4000000 > 0,  # Battle hyper chart bit
                 )
-        elif self.version == VersionConstants.POPN_MUSIC_PEACE:
+        elif game_version == VersionConstants.POPN_MUSIC_PEACE:
             # Based on M39:J:A:A:2020092800
 
             # Normal offset for music DB, size
@@ -990,6 +997,103 @@ class ImportPopn(ImportBase):
 
             # Offset and step of file DB
             file_offset = 0x2B8010
+            file_step = 32
+
+            # Standard lookups
+            genre_offset = 0
+            title_offset = 1
+            artist_offset = 2
+            comment_offset = 3
+            english_title_offset = 4
+            english_artist_offset = 5
+            extended_genre_offset = -1
+            charts_offset = 8
+            folder_offset = 9
+
+            # Offsets for normal chart difficulties
+            easy_offset = 12
+            normal_offset = 13
+            hyper_offset = 14
+            ex_offset = 15
+
+            # Offsets for battle chart difficulties
+            battle_normal_offset = 16
+            battle_hyper_offset = 17
+
+            # Offsets into which offset to seek to for file lookups
+            easy_file_offset = 18
+            normal_file_offset = 19
+            hyper_file_offset = 20
+            ex_file_offset = 21
+            battle_normal_file_offset = 22
+            battle_hyper_file_offset = 23
+
+            packedfmt = (
+                '<'
+                'I'  # Genre
+                'I'  # Title
+                'I'  # Artist
+                'I'  # Comment
+                'I'  # English Title
+                'I'  # English Artist
+                'H'  # ??
+                'H'  # ??
+                'I'  # Available charts mask
+                'I'  # Folder
+                'I'  # Event unlocks?
+                'I'  # Event unlocks?
+                'B'  # Easy difficulty
+                'B'  # Normal difficulty
+                'B'  # Hyper difficulty
+                'B'  # EX difficulty
+                'B'  # Battle normal difficulty
+                'B'  # Battle hyper difficulty
+                'xx'  # Unknown pointer
+                'H'  # Easy chart pointer
+                'H'  # Normal chart pointer
+                'H'  # Hyper chart pointer
+                'H'  # EX chart pointer
+                'H'  # Battle normal pointer
+                'H'  # Battle hyper pointer
+                'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+            )
+
+            # Offsets into file DB for finding file and folder.
+            file_folder_offset = 0
+            file_name_offset = 1
+
+            filefmt = (
+                '<'
+                'I'  # Folder
+                'I'  # Filename
+                'I'
+                'I'
+                'I'
+                'I'
+                'I'
+                'I'
+            )
+
+            # Decoding function for chart masks
+            def available_charts(mask: int) -> Tuple[bool, bool, bool, bool, bool, bool]:
+                return (
+                    mask & 0x0080000 > 0,  # Easy chart bit
+                    True,  # Always a normal chart
+                    mask & 0x1000000 > 0,  # Hyper chart bit
+                    mask & 0x2000000 > 0,  # Ex chart bit
+                    True,  # Always a battle normal chart
+                    mask & 0x4000000 > 0,  # Battle hyper chart bit
+                )
+        elif game_version == VersionConstants.POPN_MUSIC_KAIMEI_RIDDLES:
+            # Based on M39:J:A:A:2020120900
+
+            # Normal offset for music DB, size
+            offset = 0x2C7938
+            step = 172
+            length = 1914
+
+            # Offset and step of file DB
+            file_offset = 0x2B7810
             file_step = 32
 
             # Standard lookups
@@ -1160,6 +1264,122 @@ class ImportPopn(ImportBase):
                 songinfo['genre'] == 'ＤＵＭＭＹ'
             ):
                 # This is a song the intern left in
+                continue
+
+            # Fix accent issues with title/artist
+            accent_lut: Dict[str, str] = {
+                "鵝": "7",
+                "圄": "à",
+                "圉": "ä",
+                "鵤": "Ä",
+                "鵑": "👁",
+                "鶤": "©",
+                "圈": "é",
+                "鵐": "ê",
+                "鵙": "Ə",
+                "鵲": "ë",
+                "！": "!",
+                "囿": "♥",
+                "鶚": "㊙",
+                "鶉": "ó",
+                "鶇": "ö",
+                "鶲": "Ⓟ",
+                "鶫": "²",
+                "圍": "@",
+                "圖": "ţ",
+                "鵺": "Ü",
+                "囎": ":",
+                "囂": "♡",
+                "釁": "🐾",
+            }
+
+            for orig, rep in accent_lut.items():
+                songinfo['title'] = songinfo['title'].replace(orig, rep)
+                songinfo['artist'] = songinfo['artist'].replace(orig, rep)
+                songinfo['title_en'] = songinfo['title_en'].replace(orig, rep)
+                songinfo['artist_en'] = songinfo['artist_en'].replace(orig, rep)
+                songinfo['genre'] = songinfo['genre'].replace(orig, rep)
+            songs.append(songinfo)
+
+        return songs
+
+    def scrape_xml(self, xmlfile: str, songs: List[Dict[str, Any]] = []) -> List[Dict[str, Any]]:
+        with open(xmlfile, 'rb') as xmlhandle:
+            xmldata = xmlhandle.read().decode('shift_jisx0213')
+            root = ET.fromstring(xmldata)
+
+        for music_entry in root.findall('music'):
+            difficulties = [0, 0, 0, 0, 0, 0]
+            filenames = ['', '', '', '', '', '']
+            diff_map = {
+                'ep': 0,
+                'np': 1,
+                'hp': 2,
+                'op': 3,
+                'bp_n': 4,
+                'bp_h': 5,
+            }
+            charts = music_entry.find('charts')
+            if charts is not None:
+                for chart in charts.findall('chart'):
+                    chart_idx = diff_map.get(chart.attrib['idx'])
+                    if chart.find('diff') is not None:
+                        difficulties[chart_idx] = int(chart.find('diff').text)
+                        filenames[chart_idx] = f'{chart.find("folder").text}/{chart.find("filename").text}'
+            # Check if song metadata is in this entry
+            if music_entry.find('fw_title') is not None:
+                songinfo = {
+                    'id': int(music_entry.attrib['id']),
+                    'title': music_entry.find('fw_title').text,
+                    'artist': music_entry.find('fw_artist').text,
+                    'genre': music_entry.find('fw_genre').text,
+                    'comment': music_entry.find('genre').text,
+                    'title_en': music_entry.find('title').text,
+                    'artist_en': music_entry.find('artist').text,
+                    'long_genre': '',
+                    'folder': music_entry.find('folder').text,
+                    'difficulty': {
+                        'standard': {
+                            'easy': difficulties[0],
+                            'normal': difficulties[1],
+                            'hyper': difficulties[2],
+                            'ex': difficulties[3],
+                        },
+                        'battle': {
+                            'normal': difficulties[4],
+                            'hyper': difficulties[5],
+                        }
+                    },
+                    'file': {
+                        'standard': {
+                            'easy': filenames[0],
+                            'normal': filenames[1],
+                            'hyper': filenames[2],
+                            'ex': filenames[3],
+                        },
+                        'battle': {
+                            'normal': filenames[4],
+                            'hyper': filenames[5],
+                        },
+                    },
+                }
+            # It's not here so find the entry at the current song id
+            else:
+                for song in songs:
+                    if song['id'] == int(music_entry.attrib['id']):
+                        if difficulties is not None:
+                            for diff, i in zip(['easy', 'normal', 'hyper', 'ex'], range(4)):
+                                song['difficulty']['standard'][diff] = difficulties[i] if difficulties[i] else song['difficulty']['standard'][diff]
+                                song['file']['standard'][diff] = filenames[i] if filenames[i] else song['file']['standard'][diff]
+
+                            song['difficulty']['battle']['normal'] = difficulties[4] if difficulties[4] else song['difficulty']['battle']['normal']
+                            song['difficulty']['battle']['hyper'] = difficulties[5] if difficulties[5] else song['difficulty']['battle']['hyper']
+                            song['file']['battle']['normal'] = filenames[4] if filenames[4] else song['file']['battle']['normal']
+                            song['file']['battle']['hyper'] = filenames[5] if filenames[5] else song['file']['battle']['hyper']
+                        else:
+                            song['genre'] = music_entry.find('fw_genre').text
+                            song['comment'] = music_entry.find('genre').text
+                        break
                 continue
 
             # Fix accent issues with title/artist
@@ -1383,7 +1603,7 @@ class ImportJubeat(ImportBase):
                 int(music_entry.find('level_ext').text),
             ]
             genre = "other"
-            if music_entry.find('genre') is not None: # Qubell extend music_info doesn't have this field
+            if music_entry.find('genre') is not None:  # Qubell extend music_info doesn't have this field
                 for possible_genre in music_entry.find('genre'):
                     if int(possible_genre.text) != 0:
                         genre = str(possible_genre.tag)
@@ -4028,12 +4248,16 @@ if __name__ == "__main__":
         popn = ImportPopn(config, args.version, args.no_combine, args.update)
         if args.bin:
             songs = popn.scrape(args.bin)
+            if args.xml:
+                songs = popn.scrape_xml(args.xml, songs)
+        elif args.xml:
+            songs = popn.scrape_xml(args.xml)
         elif args.server and args.token:
             songs = popn.lookup(args.server, args.token)
         else:
             raise Exception(
                 'No game DLL provided and no remote server specified! Please ' +
-                'provide either a --bin or a --server and --token option!'
+                'provide a --bin, --xml, or a --server and --token option!'
             )
         popn.import_music_db(songs)
         popn.close()

@@ -78,39 +78,38 @@ class PopnMusicKaimeiRiddles(PopnMusicBase):
             'lobby2',
         ]
 
-    # For now, do nothing because we don't have a musicdb for this game. All the netcode remains unchanged from usaneko though.
-    # @classmethod
-    # def run_scheduled_work(cls, data: Data, config: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
-    #     """
-    #     Once a week, insert a new course.
-    #     """
-    #     events = []
-    #     if data.local.network.should_schedule(cls.game, cls.version, 'course', 'weekly'):
-    #         # Generate a new course list, save it to the DB.
-    #         start_time, end_time = data.local.network.get_schedule_duration('weekly')
-    #         all_songs = [song.id for song in data.local.music.get_all_songs(cls.game, cls.version)]
-    #         course_song = random.choice(all_songs)
-    #         data.local.game.put_time_sensitive_settings(
-    #             cls.game,
-    #             cls.version,
-    #             'course',
-    #             {
-    #                 'start_time': start_time,
-    #                 'end_time': end_time,
-    #                 'music': course_song,
-    #             },
-    #         )
-    #         events.append((
-    #             'pnm_course',
-    #             {
-    #                 'version': cls.version,
-    #                 'song': course_song,
-    #             },
-    #         ))
+    @classmethod
+    def run_scheduled_work(cls, data: Data, config: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
+        """
+        Once a week, insert a new course.
+        """
+        events = []
+        if data.local.network.should_schedule(cls.game, cls.version, 'course', 'weekly'):
+            # Generate a new course list, save it to the DB.
+            start_time, end_time = data.local.network.get_schedule_duration('weekly')
+            all_songs = [song.id for song in data.local.music.get_all_songs(cls.game, cls.version)]
+            course_song = random.choice(all_songs)
+            data.local.game.put_time_sensitive_settings(
+                cls.game,
+                cls.version,
+                'course',
+                {
+                    'start_time': start_time,
+                    'end_time': end_time,
+                    'music': course_song,
+                },
+            )
+            events.append((
+                'pnm_course',
+                {
+                    'version': cls.version,
+                    'song': course_song,
+                },
+            ))
 
-    #         # Mark that we did some actual work here.
-    #         data.local.network.mark_scheduled(cls.game, cls.version, 'course', 'weekly')
-    #     return events
+            # Mark that we did some actual work here.
+            data.local.network.mark_scheduled(cls.game, cls.version, 'course', 'weekly')
+        return events
 
     def __score_to_rank(self, score: int) -> int:
         if score < 50000:
@@ -324,7 +323,7 @@ class PopnMusicKaimeiRiddles(PopnMusicBase):
             popular.add_child(Node.s16('chara_num', charaid))
 
         # Top 500 Popular music
-        for (songid, plays) in self.data.local.music.get_hit_chart(self.game, self.version, 500):
+        for (songid, plays) in self.data.local.music.get_hit_chart(self.game, self.music_version, 500):
             popular_music = Node.void('popular_music')
             root.add_child(popular_music)
             popular_music.add_child(Node.s16('music_num', songid))
@@ -549,7 +548,7 @@ class PopnMusicKaimeiRiddles(PopnMusicBase):
             return root
         rivalid = links[no].other_userid
         rivalprofile = profiles[rivalid]
-        scores = self.data.remote.music.get_scores(self.game, self.version, rivalid)
+        scores = self.data.remote.music.get_scores(self.game, self.music_version, rivalid)
 
         # First, output general profile info.
         friend = Node.void('friend')
@@ -623,7 +622,7 @@ class PopnMusicKaimeiRiddles(PopnMusicBase):
             return Node.void('player24')
 
         root = Node.void('player24')
-        scores = self.data.remote.music.get_scores(self.game, self.version, userid)
+        scores = self.data.remote.music.get_scores(self.game, self.music_version, userid)
         for score in scores:
             # Skip any scores for chart types we don't support
             if score.chart not in [
@@ -759,7 +758,7 @@ class PopnMusicKaimeiRiddles(PopnMusicBase):
         root.add_child(Node.s8('result', 1))
 
         # Scores
-        scores = self.data.remote.music.get_scores(self.game, self.version, userid)
+        scores = self.data.remote.music.get_scores(self.game, self.music_version, userid)
         for score in scores:
             # Skip any scores for chart types we don't support
             if score.chart not in [
@@ -843,8 +842,8 @@ class PopnMusicKaimeiRiddles(PopnMusicBase):
         account.add_child(Node.s16_array('license_data', [-1] * 20))
 
         # Song statistics
-        last_played = [x[0] for x in self.data.local.music.get_last_played(self.game, self.version, userid, 10)]
-        most_played = [x[0] for x in self.data.local.music.get_most_played(self.game, self.version, userid, 20)]
+        last_played = [x[0] for x in self.data.local.music.get_last_played(self.game, self.music_version, userid, 10)]
+        most_played = [x[0] for x in self.data.local.music.get_most_played(self.game, self.music_version, userid, 20)]
         while len(last_played) < 10:
             last_played.append(-1)
         while len(most_played) < 20:
@@ -1045,7 +1044,7 @@ class PopnMusicKaimeiRiddles(PopnMusicBase):
 
         if game_config.get_bool('force_unlock_songs'):
             ids: Dict[int, int] = {}
-            songs = self.data.local.music.get_all_songs(self.game, self.version)
+            songs = self.data.local.music.get_all_songs(self.game, self.music_version)
             for song in songs:
                 if song.id not in ids:
                     ids[song.id] = 0
@@ -1099,7 +1098,7 @@ class PopnMusicKaimeiRiddles(PopnMusicBase):
             mission.add_child(Node.u32('mission_comp', complete))
 
         # Scores
-        scores = self.data.remote.music.get_scores(self.game, self.version, userid)
+        scores = self.data.remote.music.get_scores(self.game, self.music_version, userid)
         for score in scores:
             # Skip any scores for chart types we don't support
             if score.chart not in [

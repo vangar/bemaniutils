@@ -1,12 +1,13 @@
 # vim: set fileencoding=utf-8
 import binascii
 import copy
+import random
 from typing import Any, Dict, List, Optional, Tuple
 
 from bemani.backend.popn.base import PopnMusicBase
 from bemani.backend.popn.peace import PopnMusicPeace
 from bemani.common import Time, ID, ValidatedDict, VersionConstants, Parallel
-from bemani.data import UserID, Achievement, Link
+from bemani.data import Data, UserID, Achievement, Link
 from bemani.protocol import Node
 
 

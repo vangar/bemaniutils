@@ -1861,7 +1861,7 @@ class ImportIIDX(ImportBase):
         no_combine: bool,
         update: bool,
     ) -> None:
-        if version in ['20', '21', '22', '23', '24', '25', '26', '27']:
+        if version in ['20', '21', '22', '23', '24', '25', '26', '27', '28']:
             actual_version = {
                 '20': VersionConstants.IIDX_TRICORO,
                 '21': VersionConstants.IIDX_SPADA,
@@ -1891,7 +1891,7 @@ class ImportIIDX(ImportBase):
             actual_version = None
             self.charts = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         else:
-            raise Exception("Unsupported IIDX version, expected one of the following: 20, 21, 22, 23, 24, 25, 26, 27 omni-20, omni-21, omni-22, omni-23, omni-24, omni-25, omni-26, omni-27!")
+            raise Exception("Unsupported IIDX version, expected one of the following: 20, 21, 22, 23, 24, 25, 26, 27, 28, omni-20, omni-21, omni-22, omni-23, omni-24, omni-25, omni-26, omni-27!")
         if actual_version is not None:
             if actual_version >= (VersionConstants.IIDX_HEROIC_VERSE + DBConstants.OMNIMIX_VERSION_BUMP) or \
                     (actual_version >= VersionConstants.IIDX_HEROIC_VERSE and
@@ -2371,6 +2371,24 @@ class ImportIIDX(ImportBase):
             qp_hand_length = 321
             qp_body_offset = 0x82D130
             qp_body_length = 344
+            filename_offset = 0
+            qpro_id_offset = 1
+            packedfmt = (
+                'L'  # filename
+                'L'  # string containing id and name of the part
+            )
+        if self.version == VersionConstants.IIDX_BISTROVER:
+            stride = 16
+            qp_head_offset = 0x81A2F0    # qpro body parts are stored in 5 separate arrays in the game data, since there can be collision in
+            qp_head_length = 303         # the qpro id numbers, it's best to store them as separate types in the catalog as well.
+            qp_hair_offset = 0x81B5E0
+            qp_hair_length = 320
+            qp_face_offset = 0x81C9E0
+            qp_face_length = 223
+            qp_hand_offset = 0x81D7D0
+            qp_hand_length = 334
+            qp_body_offset = 0x818CA0
+            qp_body_length = 357
             filename_offset = 0
             qpro_id_offset = 1
             packedfmt = (

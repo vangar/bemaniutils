@@ -89,6 +89,9 @@ class IIDXMusicDB:
         elif data[4] == 0x1B:
             offset = 0xDAD0
             leap = 0x52C
+        elif data[4] == 0x1C:
+            offset = 0xE2A0
+            leap = 0x52C
 
         if sig[0] != b'IIDX':
             raise Exception(f'Invalid signature \'{sig[0]}\' found!')

@@ -1326,6 +1326,7 @@ class ImportPopn(ImportBase):
                     if chart.find('diff') is not None:
                         difficulties[chart_idx] = int(chart.find('diff').text)
                         filenames[chart_idx] = f'{chart.find("folder").text}/{chart.find("filename").text}'
+            songinfo: Dict
             # Check if song metadata is in this entry
             if music_entry.find('fw_title') is not None:
                 songinfo = {

@@ -303,7 +303,7 @@ class JubeatSaucerFulfill(
             player.add_child(Node.s32('jid', extid))
             playdata = Node.void('playdata')
             player.add_child(playdata)
-            playdata.set_attribute('count', 0)
+            playdata.set_attribute('count', '0')
             return root
         root = self.get_scores_by_extid(extid)
         if root is None:
